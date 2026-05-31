@@ -1,0 +1,10 @@
+# Demo engine (Arcade maze visualization)
+arcade>=2.6.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+pynput>=1.7.6
+
+# NexAI (LLM optimization loop)
+google-generativeai>=0.8.0
+psutil>=5.9.0
+python-dotenv>=1.0.0
