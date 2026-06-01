@@ -1,125 +1,28 @@
-====================================================================================================
-FULL OPTIMIZATION INSTRUCTIONS (STRICT OUTPUT FORMAT)
-====================================================================================================
+Optimize MazeController. Output ONLY valid Python (no prose, markdown, # comments, docstrings, or ``` fences).
 
-You are performing an iterative optimization of the MazeController block inside a Python file.
+Replace code between ###optimization-start / ###optimization-end only. That block is a whole runnable file slice — output COMPLETE code (imports + class + helpers), not partial snippets, ellipses, or "..." placeholders. Do NOT output markers, prior feed, or anything outside the block.
 
-OUTPUT RULES (CRITICAL)
--------------------------
-OUTPUT ONLY valid Python code — nothing else.
-FORBIDDEN in your response (will be rejected):
-- Plain English sentences or reasoning ("Wait,", "Goal:", "The previous...")
-- Markdown bullets (* item), numbered lists, headers
-- Comments (# ...) and docstrings
-- Triple-backtick code fences
-
-Your response must be ONLY executable Python that replaces the block between the markers.
-
-Required API (do not change signatures):
+API (signatures fixed):
 - __init__(self, maze, start=(0, 0), max_steps=450)
-- export(self) -> list[str]   # return ALL moves at once, e.g. ["up","right",...]
-  NOT one move per call. Build the full path inside export(), then return self.moves.
+- export(self) -> list[str]  # full path e.g. ["up","right",...]; build in export(), return self.moves — not one move per call
 
-OUTPUT ONLY the code that goes BETWEEN:
+MAZE: NumPy 21×21; even row/col open (0), odd may be wall (1). Moves: up/down/left/right. 3×3 visibility on ball. Max 450 steps. Every open cell discovered once (enters 3×3 view).
 
-###optimization-start
-<your optimized code here>
-###optimization-end
-
-DO NOT output these markers yourself.
-DO NOT output explanations, reasoning, comments, or extra text.
-DO NOT output the previous iteration feed.
-DO NOT output anything outside the code block.
-DO NOT wrap the answer in triple backticks.
-
-Your ENTIRE response MUST be ONLY the optimized code that replaces the inside of the block.
-
-====================================================================================================
-MAZE ENVIRONMENT: HARD RULES
-====================================================================================================
-
-- Maze is a NumPy 2D array of size 21×21.
-- Even row/column indices are ALWAYS open (0).
-- Odd indices may contain walls (1).
-- Movement allowed: "up", "down", "left", "right".
-- Ball visibility is 3×3 centered on current position.
-- Movement budget: 450 steps maximum.
-- Every open cell must be discovered at least once.
-- A cell is "discovered" when it enters the 3×3 visibility range.
-
-====================================================================================================
-OPTIMIZATION PRIORITIES (USE THESE)
-====================================================================================================
-
-1. PRIMARY OBJECTIVE — Full Discovery With MINIMUM Steps
-- Discover ALL reachable open cells.
-- Use the FEWEST steps possible. Step count is the top performance metric.
-- Maximize discovery per step: newly_discovered_cells / steps_taken.
-
-2. CODE SIZE — MAXIMUM COMPRESSION (CRITICAL)
-- "Minimal" means COMPRESS the source code as much as possible — NOT skip functionality.
-- You MUST still implement FULL maze discovery, ALL required behavior, and a complete working MazeController.
-- Do NOT omit logic, cut corners, skip cells, or leave out features to save lines.
-- Compress syntax only: shorter names, dense expressions, combined statements, no whitespace padding.
-- No comments. No docstrings. No blank lines for readability.
-- Single-letter variable names are fine (r, c, q, d, etc.).
-- Human readability is NOT required — but FULL correctness and FULL discovery ARE required.
-- Inline logic over helpers when it reduces total characters/lines without losing behavior.
-- Remove only REDUNDANT or DEAD code — never remove essential exploration logic.
-- Prefer dense loops and compact structures (deque, sets, tuples).
-
-3. ALGORITHM EXPLORATION
-- Each iteration, try new or alternative algorithms:
-  A*, Weighted A*, D* Lite, JPS, frontier BFS, information gain, best-first, hybrids.
-- Pick the approach that discovers fastest in fewest steps, not the most readable one.
-
-4. STABILITY (must not crash)
-- Boundary checks, safe neighbor access, valid fallback when no frontier found.
-- Stability > cleverness. A 20-line working solver beats a 200-line broken one.
-
-5. CODE SCORE — optimization signal from feedback:
+PRIORITIES:
+1. Discover ALL reachable open cells in FEWEST steps (maximize new cells / steps).
+2. Minimize SOURCE size without omitting logic: short names, dense syntax, no comments/blanks; single-letter vars OK; inline over helpers if shorter; drop dead code only; deque/sets/tuples OK. Full discovery + working controller required.
+3. Each iteration try a different approach (A*, Weighted A*, D* Lite, JPS, frontier BFS, info gain, best-first, hybrids) — fewest steps wins, not readability.
+4. Must not crash: bounds checks, safe neighbors, fallback when no frontier.
+5. Feedback — "code score" is main signal when not null; raise each good iter:
 {feedback_text}
-- "code score" is the MAIN signal when not null. Increase it each successful iteration.
 {error_section}{score_section}
 
-====================================================================================================
-ALLOWED
-====================================================================================================
+ALLOWED: import any needed module (stdlib or pip) at top of block — e.g. `from collections import deque` if using deque; full rewrite; helpers only if net shorter.
+FORBIDDEN: change __init__/export signatures; code outside block; non-Python output.
 
-- Import any library.
-- Rewrite the entire block from scratch.
-- Define compact helpers only if they reduce total line count.
+Shape: class MazeController with __init__(maze, start, max_steps) and export() returning full ["up"|"down"|"left"|"right"] list — implement both fully.
 
-====================================================================================================
-NOT ALLOWED
-====================================================================================================
-
-- Do NOT modify __init__() signature.
-- Do NOT modify export() signature.
-- Do NOT add code outside the optimization block.
-- Do NOT output explanations, comments, or text outside pure code.
-- Do NOT output prose, markdown, or thinking traces — Python only.
-
-====================================================================================================
-REQUIRED CLASS SHAPE (reference)
-====================================================================================================
-
-class MazeController:
-    def __init__(self, maze, start=(0, 0), max_steps=450):
-        ...
-    def export(self):
-        ...  # populate moves, then return list of "up"|"down"|"left"|"right"
-
-====================================================================================================
-ORIGINAL CODE BLOCK (REFERENCE ONLY — DO NOT COPY)
-====================================================================================================
-
+REFERENCE (do not copy):
 {block_code}
 
-====================================================================================================
-FINAL REMINDER
-====================================================================================================
-
-Your ENTIRE response = ONLY valid Python for MazeController.
-No prose. No markdown. No comments. export() returns the full move list.
-Maximum compression. Full discovery. Fewest steps.
+Response = ONLY a complete optimized block (all imports + full MazeController). No partial code. Max compression. Full discovery. Fewest steps.

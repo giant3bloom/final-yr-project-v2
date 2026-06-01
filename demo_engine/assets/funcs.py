@@ -32,7 +32,7 @@ def accuracy(orgin_mat, discovered) :
     score = total_diff / 100.0                  # normalize
     return 1 - score
 
-def move_accuracy(steps_taken, max_steps = 1000) :
+def move_accuracy(steps_taken, max_steps = 420) :
     """
     Takes no.of steps taken with the max_steps 
     returns a value between 0->1 as efficiency score

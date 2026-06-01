@@ -8,20 +8,11 @@ from typing import Any
 PROMPT_FILE = Path(__file__).with_name("optimization_prompt.txt")
 
 RUNTIME_ERROR_SECTION = """
-====================================================================================================
-RUNTIME ERRORS FROM PREVIOUS ITERATION (MUST FIX)
-====================================================================================================
-
-The previous generated code failed at runtime. Read the traceback and fix the bug.
-- sandbox_error: failure in headless validation
-- demo_engine_error: failure in the Arcade benchmark child process
-
-Your next version MUST run without raising. Do not repeat the same mistake.
+RUNTIME FAIL (fix before optimizing): prior code crashed. See sandbox_error (headless) / demo_engine_error (Arcade child) in feedback. Next version must run clean — no repeat bugs.
 """
 
 NULL_SCORE_SECTION = """
-NOTE: code score is null — last run failed before a score was measured.
-Priority: restore a working controller first, then minimize steps.
+code score null — last run scored nothing. Fix/working controller first, then minimize steps.
 """
 
 

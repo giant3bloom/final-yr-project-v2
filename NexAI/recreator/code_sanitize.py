@@ -13,28 +13,78 @@ def _strip_markdown_fences(text: str) -> str:
     return re.sub(r"^```(?:python)?\s*", "", text).replace("```", "").strip()
 
 
+def _maze_controller_class(tree: ast.Module) -> ast.ClassDef | None:
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == "MazeController":
+            return node
+    return None
+
+
+def _export_has_return(cls: ast.ClassDef) -> bool:
+    for node in cls.body:
+        if isinstance(node, ast.FunctionDef) and node.name == "export":
+            return any(isinstance(n, ast.Return) for n in ast.walk(node))
+    return False
+
+
 def extract_controller_code(raw: str) -> str | None:
     """Keep only the MazeController Python block from LLM output."""
     raw = _strip_markdown_fences(raw)
     raw = raw.replace("###optimization-start", "").replace("###optimization-end", "")
 
-    match = re.search(r"(class MazeController\b[\s\S]*)", raw)
+    # Prefer full block (imports + class); fall back to class-only.
+    match = re.search(
+        r"((?:from |import )[\s\S]*?)?(class MazeController\b[\s\S]*)",
+        raw,
+    )
     if not match:
         return None
 
-    code = match.group(1).strip()
+    code = (match.group(1) or "") + match.group(2)
+    code = code.strip()
 
-    # Drop trailing prose after the class (lines that fail parse from the tail)
     lines = code.splitlines()
     while lines:
         candidate = "\n".join(lines).strip()
         try:
-            ast.parse(candidate)
-            return candidate
+            tree = ast.parse(candidate)
         except SyntaxError:
             lines.pop()
+            continue
+        cls = _maze_controller_class(tree)
+        if cls and _export_has_return(cls):
+            return candidate
+        lines.pop()
 
     return None
+
+
+def _dry_run_controller(code: str) -> tuple[bool, str | None]:
+    namespace: dict = {}
+    try:
+        exec(compile(code, "<optimization_block>", "exec"), namespace, namespace)
+    except Exception as exc:
+        return False, f"Block exec failed: {exc}"
+
+    controller_cls = namespace.get("MazeController")
+    if controller_cls is None:
+        return False, "MazeController not defined after exec"
+
+    try:
+        import numpy as np
+
+        maze = np.zeros((21, 21), dtype=int)
+        ctrl = controller_cls(maze, start=(0, 0), max_steps=50)
+        moves = ctrl.export()
+    except Exception as exc:
+        return False, f"MazeController dry-run failed: {exc}"
+
+    if not isinstance(moves, list):
+        return False, "export() must return a list"
+    for move in moves:
+        if move not in ("up", "down", "left", "right"):
+            return False, f"Invalid move: {move!r}"
+    return True, None
 
 
 def validate_controller_code(code: str) -> tuple[bool, str | None]:
@@ -44,14 +94,15 @@ def validate_controller_code(code: str) -> tuple[bool, str | None]:
     except SyntaxError as exc:
         return False, f"Invalid Python syntax: {exc}"
 
-    classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "MazeController"]
-    if not classes:
+    cls = _maze_controller_class(tree)
+    if cls is None:
         return False, "Missing class MazeController"
 
-    cls = classes[0]
     methods = {n.name for n in cls.body if isinstance(n, ast.FunctionDef)}
     if "__init__" not in methods or "export" not in methods:
         return False, "MazeController must define __init__ and export"
+    if not _export_has_return(cls):
+        return False, "export() must contain a return statement (complete implementation)"
 
     prose_markers = (
         re.compile(r"^\s*\*\s"),
@@ -64,4 +115,4 @@ def validate_controller_code(code: str) -> tuple[bool, str | None]:
             if pat.match(line):
                 return False, "Response contains prose/markdown, not pure Python"
 
-    return True, None
+    return _dry_run_controller(code)
