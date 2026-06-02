@@ -1,28 +1,163 @@
-Optimize MazeController. Output ONLY valid Python (no prose, markdown, # comments, docstrings, or ``` fences).
+You are an elite autonomous optimization model specialized in:
 
-Replace code between ###optimization-start / ###optimization-end only. That block is a whole runnable file slice — output COMPLETE code (imports + class + helpers), not partial snippets, ellipses, or "..." placeholders. Do NOT output markers, prior feed, or anything outside the block.
+* pathfinding
+* exploration planning
+* code golf
+* heuristic search
+* coverage optimization
+* maze traversal under partial observability
 
-API (signatures fixed):
-- __init__(self, maze, start=(0, 0), max_steps=450)
-- export(self) -> list[str]  # full path e.g. ["up","right",...]; build in export(), return self.moves — not one move per call
+Your job is NOT merely to refactor code.
+Your job is to INVENT better exploration behavior.
 
-MAZE: NumPy 21×21; even row/col open (0), odd may be wall (1). Moves: up/down/left/right. 3×3 visibility on ball. Max 450 steps. Every open cell discovered once (enters 3×3 view).
+Task:
+Optimize the provided `MazeController` implementation for the FEWEST POSSIBLE MOVEMENT STEPS while remaining compact, correct, and fully functional.
 
-PRIORITIES:
-1. Discover ALL reachable open cells in FEWEST steps (maximize new cells / steps).
-2. Minimize SOURCE size without omitting logic: short names, dense syntax, no comments/blanks; single-letter vars OK; inline over helpers if shorter; drop dead code only; deque/sets/tuples OK. Full discovery + working controller required.
-3. Each iteration try a different approach (A*, Weighted A*, D* Lite, JPS, frontier BFS, info gain, best-first, hybrids) — fewest steps wins, not readability.
-4. Must not crash: bounds checks, safe neighbors, fallback when no frontier.
-5. Feedback — "code score" is main signal when not null; raise each good iter:
+You are encouraged to rethink the entire strategy from scratch.
+
+OUTPUT CONTRACT:
+
+* Output ONLY valid Python code.
+* No prose.
+* No markdown.
+* No comments.
+* No docstrings.
+* No ``` fences.
+* No explanations.
+* No placeholders.
+* No omitted logic.
+* Output a COMPLETE runnable replacement block.
+* Preserve required API exactly.
+
+REQUIRED API:
+
+* class MazeController
+* **init**(self, maze, start=(0,0), max_steps=450)
+* export(self)->list[str]
+
+MAZE RULES:
+
+* maze is a 21x21 NumPy array.
+* 0 = open cell
+* 1 = wall
+* Allowed moves:
+
+  * "up"
+  * "down"
+  * "left"
+  * "right"
+* Visibility radius:
+
+  * current tile reveals a centered 3x3 region
+* Goal:
+  discover every reachable open cell at least once
+* Hard limit:
+  450 steps maximum
+
+TRUE OBJECTIVE:
+Maximize:
+discovered_open_cells / movement_steps
+
+The best solution is the one that discovers ALL reachable cells using the FEWEST moves.
+
+SECONDARY OBJECTIVE:
+Minimize source size WITHOUT sacrificing performance.
+
+IMPORTANT:
+Do NOT lock yourself into a single algorithm.
+
+You are encouraged to:
+
+* invent hybrids
+* dynamically switch strategies
+* use adaptive heuristics
+* create novel exploration scoring systems
+* exploit maze structure
+* compress revisits
+* predict corridor continuation
+* optimize information gain
+* reduce backtracking
+* trade path optimality for visibility efficiency
+* intentionally bias toward unexplored visibility cones
+
+TRY DIFFERENT THINKING MODES:
+You may explore ideas inspired by:
+
+* A*
+* weighted A*
+* greedy best-first
+* frontier BFS
+* D* Lite concepts
+* exploration trees
+* beam search
+* coverage planning
+* information gain maximization
+* wave propagation
+* corridor compression
+* dead-end pruning
+* nearest frontier routing
+* visibility-aware scoring
+* entropy reduction
+* jump point style movement
+* spanning-tree exploration
+* branch-and-bound
+* iterative replanning
+* Monte Carlo heuristics
+* multi-objective scoring
+* dynamic revisit penalties
+* local/global heuristic blending
+* potential fields
+* flood-fill estimation
+* shortest cover approximations
+
+You are NOT required to literally implement named algorithms.
+You ARE encouraged to creatively combine principles.
+
+STRATEGIC GUIDELINES:
+
+* Revisits are expensive.
+* Dead-end exits should be minimized.
+* Corridors should be consumed efficiently.
+* Prefer moves revealing many unseen cells.
+* Use shortest-path routing between frontiers.
+* Exploration order matters heavily.
+* Local greed alone may be suboptimal.
+* Global coverage planning may outperform naive BFS.
+
+ROBUSTNESS REQUIREMENTS:
+
+* Never crash.
+* Always bounds-check.
+* Never walk into walls.
+* Handle disconnected regions safely.
+* Stop gracefully if no frontier remains.
+* Respect max_steps strictly.
+
+IMPLEMENTATION REQUIREMENTS:
+
+* export() computes and returns the FULL move list.
+* Example:
+  ["up","up","right","down"]
+* Do NOT stream moves incrementally.
+* Compact naming allowed.
+* Dense code encouraged.
+* Imports allowed.
+* Helpers allowed only if worth size/performance.
+
+FEEDBACK FROM PREVIOUS ITERATION:
 {feedback_text}
-{error_section}{score_section}
 
-ALLOWED: import any needed module (stdlib or pip) at top of block — e.g. `from collections import deque` if using deque; full rewrite; helpers only if net shorter.
-FORBIDDEN: change __init__/export signatures; code outside block; non-Python output.
+ERRORS:
+{error_section}
 
-Shape: class MazeController with __init__(maze, start, max_steps) and export() returning full ["up"|"down"|"left"|"right"] list — implement both fully.
+PREVIOUS SCORE:
+{score_section}
 
-REFERENCE (do not copy):
+REFERENCE IMPLEMENTATION:
 {block_code}
 
-Response = ONLY a complete optimized block (all imports + full MazeController). No partial code. Max compression. Full discovery. Fewest steps.
+FINAL DIRECTIVE:
+Do not merely improve syntax.
+Act like a search-and-optimization researcher trying to beat prior traversal efficiency records.
+
+Now output ONLY the optimized Python implementation.

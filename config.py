@@ -52,6 +52,7 @@ GEMINI_THINKING_BUDGET = int(os.getenv("GEMINI_THINKING_BUDGET", "0"))
 
 MAX_STEPS = 450
 MOVE_TIME = 0.01
+MAX_LLM_RETRIES = 3
 
 
 def ensure_output_dirs() -> None:

@@ -7,12 +7,11 @@ from typing import Any
 import google.generativeai as genai
 from google.api_core import exceptions as google_exceptions
 
-from config import CONTROLLER_PATH, GEMINI_MODEL, GEMINI_THINKING_BUDGET
+from config import CONTROLLER_PATH, GEMINI_MODEL, GEMINI_THINKING_BUDGET, MAX_LLM_RETRIES
 from NexAI.dynamic.status import log_message
+from NexAI.recreator.block_io import read_optimization_code, write_optimization_code
 from NexAI.recreator.code_sanitize import extract_controller_code, validate_controller_code
 from NexAI.recreator.prompt import build_optimization_prompt, format_feedback
-
-MAX_LLM_RETRIES = 3
 
 
 class AdaptiveMazeBlockOptimizer:
@@ -26,6 +25,7 @@ class AdaptiveMazeBlockOptimizer:
         self.model_name = model_name
         self.model = genai.GenerativeModel(model_name)
         self._generation_config = self._build_generation_config(model_name)
+        self.last_error: str | None = None
         print(f"Using model: {model_name}")
 
     @staticmethod
@@ -98,19 +98,9 @@ class AdaptiveMazeBlockOptimizer:
     ) -> bool:
 
         script_path = script_path or CONTROLLER_PATH
-        with open(script_path, "r", encoding="utf-8") as f:
-            script = f.read()
-
-        pattern = re.compile(
-            r"(?P<start>###optimization-start)(?P<code>.*?)(?P<end>###optimization-end)",
-            re.DOTALL,
-        )
-        match = pattern.search(script)
-        if not match:
-            raise ValueError("Optimization block not found in the script.")
-
-        cleaned_code = match.group("code").strip()
+        cleaned_code = read_optimization_code(script_path)
         prompt = self._prepare_prompt(cleaned_code, feedback)
+        self.last_error = None
 
         optimized_code = None
         last_error = ""
@@ -176,28 +166,27 @@ class AdaptiveMazeBlockOptimizer:
 
         ok, err = validate_controller_code(extracted)
         if not ok:
-            feedback_llm_error = err or "validation failed"
+            self.last_error = err or "validation failed"
             log_message(
                 "LLM code failed validation",
                 False,
                 phase="llm",
                 score=None,
-                error=feedback_llm_error,
+                error=self.last_error,
             )
             return False
 
-        optimized_code = extracted
-
-        new_block = (
-            match.group("start")
-            + "\n"
-            + optimized_code
-            + "\n"
-            + match.group("end")
-        )
-        updated_script = pattern.sub(new_block, script)
-
-        with open(script_path, "w", encoding="utf-8") as f:
-            f.write(updated_script)
+        try:
+            write_optimization_code(script_path, extracted)
+        except Exception as exc:
+            self.last_error = str(exc)
+            log_message(
+                "Failed to write controller block",
+                False,
+                phase="llm",
+                score=None,
+                error=self.last_error,
+            )
+            return False
 
         return True

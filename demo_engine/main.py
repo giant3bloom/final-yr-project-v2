@@ -7,6 +7,7 @@ import numpy as np
 
 from config import MOVE_TIME, ensure_output_dirs
 from demo_engine.assets import maze_gui, random_maze as maz, controller as ctrl, funcs
+from demo_engine.discovery import simulate_discovery
 from demo_engine.io import file_op as f_op
 
 MAX_STEPS = 450
@@ -16,15 +17,16 @@ def ran_value():
     r = random.getrandbits(32)
     if random.choice([True, False]):
         r = -r
-    return r % (2**32)
+    return r
 
 
 RAN_VALUE = ran_value()
 
 
-def abs_acc(maze, steps_count):
-    discovered = -np.ones_like(maze)
-    return funcs.absolute_accuracy(maze, discovered, steps_count)
+def abs_acc(maze, mat, steps):
+    discovered_full = simulate_discovery(maze, steps, start=(0, 0))
+    discovered = funcs.strink_matrix(discovered_full)
+    return funcs.absolute_accuracy(mat, discovered, len(steps))
 
 
 def itr(seed):
@@ -52,7 +54,7 @@ def itr(seed):
     arcade.schedule(move_step, MOVE_TIME)
     arcade.run()
 
-    return [int(end_t - start_t), abs_acc(maze, steps_count)]
+    return [int(end_t - start_t), abs_acc(maze, mat, steps)]
 
 
 def run(itr_count=10):

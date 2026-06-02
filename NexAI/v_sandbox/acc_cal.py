@@ -17,7 +17,7 @@ def accuracy(origin_mat, discovered):
 
 
 def move_accuracy(steps_taken, max_steps=450):
-    return 1 - (steps_taken / max_steps)
+    return max(0, 1 - (steps_taken / max_steps))
 
 
 def absolute_accuracy(origin_mat, discovered, steps_taken, max_steps=450, x=7, y=3):

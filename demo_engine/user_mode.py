@@ -34,7 +34,7 @@ def main():
         window.move_ball(direction)
 
     def save_run():
-        discovered = np.full((10, 10), -1)
+        discovered = funcs.strink_matrix(window.discovered)
         acc = round(funcs.absolute_accuracy(mat, discovered, len(moves)), 2)
         print("No.of.Steps:", len(moves))
 

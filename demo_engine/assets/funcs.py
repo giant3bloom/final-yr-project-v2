@@ -38,7 +38,7 @@ def move_accuracy(steps_taken, max_steps = 420) :
     returns a value between 0->1 as efficiency score
     """ 
     
-    return  1 - (steps_taken / max_steps)
+    return  max(0, 1 - (steps_taken / max_steps))
 
 def absolute_accuracy(orgin_mat, discovered, steps_taken, max_steps=450, x=7, y=3):
     """

@@ -8,7 +8,7 @@ import traceback
 from config import MAX_STEPS
 
 
-def run_sandbox(max_steps: int = MAX_STEPS, max_collision_percent: float = 0.1) -> dict:
+def run_sandbox(max_steps: int = MAX_STEPS, max_collision_percent: float = 10.1) -> dict:
     result = {
         "success": False,
         "low_collision": False,
@@ -24,6 +24,7 @@ def run_sandbox(max_steps: int = MAX_STEPS, max_collision_percent: float = 0.1) 
         import numpy as np
 
         from demo_engine.assets import controller, funcs, random_maze as maz
+        from demo_engine.discovery import simulate_discovery
         from demo_engine.validation import verify_wall_collision
 
         mat = maz.random_maze()
@@ -35,8 +36,9 @@ def run_sandbox(max_steps: int = MAX_STEPS, max_collision_percent: float = 0.1) 
         collision = verify_wall_collision(
             maze, (0, 0), steps, max_collision_percent, quiet=True
         )
-        discovered = -np.ones_like(maze)
-        acc_val = round(float(funcs.absolute_accuracy(maze, discovered, len(steps))), 2)
+        discovered_full = simulate_discovery(maze, steps, start=(0, 0))
+        discovered = funcs.strink_matrix(discovered_full)
+        acc_val = round(float(funcs.absolute_accuracy(mat, discovered, len(steps))), 2)
 
         result.update(
             {

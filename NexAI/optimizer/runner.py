@@ -107,7 +107,9 @@ def single_itr(
 
         log_message("code-generation", True, phase="llm", score=score)
         if not optimizer.optimize_block(feedback):
-            feedback["llm_error"] = feedback.get("llm_error") or "LLM step failed"
+            feedback["llm_error"] = (
+                optimizer.last_error or feedback.get("llm_error") or "LLM step failed"
+            )
             log_message(
                 "code-generation",
                 False,
@@ -131,7 +133,9 @@ def single_itr(
     )
     log_message("code-generation", False, phase="llm", score=None, error=error_text)
     if not optimizer.optimize_block(feedback):
-        feedback["llm_error"] = feedback.get("llm_error") or "LLM step failed"
+        feedback["llm_error"] = (
+            optimizer.last_error or feedback.get("llm_error") or "LLM step failed"
+        )
     return feedback
 
 

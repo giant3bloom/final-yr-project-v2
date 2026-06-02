@@ -34,8 +34,9 @@ def extract_controller_code(raw: str) -> str | None:
 
     # Prefer full block (imports + class); fall back to class-only.
     match = re.search(
-        r"((?:from |import )[\s\S]*?)?(class MazeController\b[\s\S]*)",
+        r"^((?:[ \t]*(?:from|import)\s+.+$\n?)+)?(class MazeController\b[\s\S]*)",
         raw,
+        re.MULTILINE,
     )
     if not match:
         return None
@@ -81,9 +82,18 @@ def _dry_run_controller(code: str) -> tuple[bool, str | None]:
 
     if not isinstance(moves, list):
         return False, "export() must return a list"
+    if len(moves) == 0:
+        return False, "export() returned no moves"
     for move in moves:
         if move not in ("up", "down", "left", "right"):
             return False, f"Invalid move: {move!r}"
+
+    from demo_engine.discovery import simulate_discovery
+
+    discovered = simulate_discovery(maze, moves, start=(0, 0))
+    if int((discovered != -1).sum()) < 20:
+        return False, "export() explores too little of the maze (incomplete path)"
+
     return True, None
 
 
